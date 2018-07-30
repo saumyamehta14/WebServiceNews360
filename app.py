@@ -24,7 +24,7 @@ def hello_world():
 	return( "Welcome to News360!!" )
 
 def mogoimport():
-	filepath = os.getcwd() + "/data.csv/"
+	filepath = "data.csv"
 	#conn = pymongo.MongoClient('mongodb://admin:admin123@localhost:27017/')
 	conn = pymongo.MongoClient('mongo', 27017)
 	mng_db = conn['Data']
@@ -34,20 +34,15 @@ def mogoimport():
 	chunksize = 10 ** 6
 	i = 0
 	for chunk in pd.read_csv(filepath, chunksize=chunksize, names=["datetime", "user", "os", "device"]):
-
 		i +=1
 		data_json = json.loads(chunk.to_json(orient='records'))
 		db_cm.insert(data_json)
 		print('done')
-
 		if ( i>2 ):
 			break
-
-
 	conn.close()
 
 @app.route('/unique-users', methods = ['GET'])
-@cache.cached(timeout=500 ,key_prefix = 'fcache')
 def findUnique():
 	device_query_parameter = request.args.get('device')
 	os_query_parameter = request.args.get('os')
@@ -83,6 +78,8 @@ def findLoyal():
 	os_query_parameter = request.args.get('os')
 	return findLoyal(device_query_parameter, os_query_parameter)
 
+
+@cache.cached(timeout=500 ,key_prefix = 'fcache')
 def findLoyal(device = "" , os="" ):
 	query={}
 	if (device == None):
@@ -106,6 +103,5 @@ def findLoyal(device = "" , os="" ):
 	return jsonify(usercount)
 
 if __name__ == '__main__':
-	print("For Debugging: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + os.listdir(os.getcwd()))
-	mogoimport()
+	# mogoimport()
 	app.run(debug=True, host='0.0.0.0',port='5000')
