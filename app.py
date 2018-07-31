@@ -31,7 +31,7 @@ cache = Cache(app, config={
 
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
-    task = mogoimport.AsyncResult(task_id)
+    task = mongoimport.AsyncResult(task_id)
     if task.state == 'PENDING':
         # job did not start yet
         response = {
@@ -60,7 +60,7 @@ def taskstatus(task_id):
     return jsonify(response)
 
 @celery.task(bind=True)
-def mogoimport(self):
+def mongoimport(self):
     filepath = "data.csv"
     # conn = pymongo.MongoClient('mongodb://admin:admin123@localhost:27017/')
     conn = pymongo.MongoClient('mongo', 27017)
@@ -76,7 +76,7 @@ def mogoimport(self):
 
 @app.route('/import-data/')
 def async_mongo_import():
-    task = mogoimport.apply_async()
+    task = mongoimport.apply_async()
     return jsonify({}), 202, {'Location': url_for('taskstatus',task_id=task.id)}
 
 @app.route("/",methods=['GET'])
@@ -143,5 +143,5 @@ def findLoyal(device = "" , os="" ):
     return {"count" : usercount}
 
 if __name__ == '__main__':
-    mogoimport()
+    mongoimport()
     app.run(debug=True, host='0.0.0.0',port='5000')
