@@ -17,6 +17,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=admin123
     volumes:
       - ./data:/data/db
+      - "$PWD/mongo-entrypoint/:/docker-entrypoint-initdb.d/"
     ports:
       - "27017:27017"
 

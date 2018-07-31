@@ -75,8 +75,14 @@ def mongoimport(self):
     conn.close()
     cache.clear()
 
-@app.route('/import-data/')
+@app.route('/import-data',methods=['GET'])
 def async_mongo_import():
+    username_authentication = request.args.get('username')
+    password_authentication = request.args.get('password')
+
+    if (username_authentication != 'admin' and password_authentication != 'admin123'):
+        print('Authentication UnSuccessfull')
+        return
     task = mongoimport.apply_async()
     return jsonify({}), 202, {'Location': url_for('taskstatus',task_id=task.id)}
 
