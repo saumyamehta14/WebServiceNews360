@@ -4,3 +4,4 @@ pandas==0.23.3
 pymongo==3.7.1
 redis
 requests
+celery
