@@ -70,14 +70,10 @@ def mogoimport(self):
     db_cm = mng_db[collection_name]
     db_cm.remove()
     chunksize = 10 ** 6
-    i = 0
     for chunk in pd.read_csv(filepath, chunksize=chunksize, names=["datetime", "user", "os", "device"]):
-        i += 1
         data_json = json.loads(chunk.to_json(orient='records'))
         db_cm.insert(data_json)
         print('done')
-        if (i > 2):
-            break
     conn.close()
 
 @app.route('/import-data/')
