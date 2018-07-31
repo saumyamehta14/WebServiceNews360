@@ -82,8 +82,9 @@ def async_mongo_import():
     if (username_authentication != 'admin' and password_authentication != 'admin123'):
         print('Authentication UnSuccessfull')
         return
-    task = mongoimport.apply_async()
-    return jsonify({}), 202, {'Location': url_for('taskstatus',task_id=task.id)}
+    else:
+        task = mongoimport.apply_async()
+        return jsonify({}), 202, {'Location': url_for('taskstatus',task_id=task.id)}
 
 @app.route("/",methods=['GET'])
 def homepage():
@@ -149,5 +150,5 @@ def findLoyal(device = "" , os="" ):
     return jsonify(usercount)
 
 if __name__ == '__main__':
-    # mongoimport()
+    #mongoimport()
     app.run(debug=True, host='0.0.0.0',port='5000')
