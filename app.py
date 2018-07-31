@@ -33,7 +33,6 @@ cache = Cache(app, config={
 def taskstatus(task_id):
     task = mongoimport.AsyncResult(task_id)
     if task.state == 'PENDING':
-        # job did not start yet
         response = {
             'state': task.state,
             'current': 0,
@@ -62,8 +61,8 @@ def taskstatus(task_id):
 @celery.task(bind=True)
 def mongoimport(self):
     filepath = "data.csv"
-    conn = pymongo.MongoClient('mongodb://admin:admin123@mongo:27017/')
-    # conn = pymongo.MongoClient('mongo', 27017)
+    # conn = pymongo.MongoClient('mongodb://admin:admin123@mongo:27017/')
+    conn = pymongo.MongoClient('mongo', 27017)
     mng_db = conn['Data']
     collection_name = 'users'
     db_cm = mng_db[collection_name]
@@ -117,7 +116,7 @@ def findUnique(device = "" , os="" ):
     for user in distinctusers:
         distinctcount = user['distinctcount']
     conn.close()
-    return {"count" : distinctcount}
+    return jsonify(distinctcount)
 
 @app.route('/loyal-users', methods = ['GET'])
 def findLoyal():
@@ -147,8 +146,8 @@ def findLoyal(device = "" , os="" ):
     for user in loyalusers:
         usercount = user['loyalcount']
     conn.close()
-    return {"count" : usercount}
+    return jsonify(usercount)
 
 if __name__ == '__main__':
-    mongoimport()
+    # mongoimport()
     app.run(debug=True, host='0.0.0.0',port='5000')
