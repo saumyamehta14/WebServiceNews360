@@ -62,8 +62,8 @@ def taskstatus(task_id):
 @celery.task(bind=True)
 def mongoimport(self):
     filepath = "data.csv"
-    # conn = pymongo.MongoClient('mongodb://admin:admin123@localhost:27017/')
-    conn = pymongo.MongoClient('mongo', 27017)
+    conn = pymongo.MongoClient('mongo://admin:admin123@mongo:27017/')
+    # conn = pymongo.MongoClient('mongo', 27017)
     mng_db = conn['Data']
     collection_name = 'users'
     db_cm = mng_db[collection_name]
@@ -73,6 +73,7 @@ def mongoimport(self):
         data_json = json.loads(chunk.to_json(orient='records'))
         db_cm.insert(data_json)
     conn.close()
+    cache.clear()
 
 @app.route('/import-data/')
 def async_mongo_import():
@@ -89,7 +90,7 @@ def findUnique():
     os_query_parameter = request.args.get('os')
     return findUnique(device_query_parameter, os_query_parameter)
 
-@cache.memoize(timeout=500)
+@cache.memoize()
 def findUnique(device = "" , os="" ):
     query={}
     if (device == None):
@@ -102,7 +103,7 @@ def findUnique(device = "" , os="" ):
     if os !="":
         oses = [int(x) for x in os.split(',')]
         query['os'] = {'$in' : oses}
-    #conn = pymongo.MongoClient('mongodb://admin:admin123@localhost:27017/')
+    #conn = pymongo.MongoClient('mongo://admin:admin123@mongo:27017/')
     conn = pymongo.MongoClient('mongo', 27017)
     db = conn['Data']
     distinctusers = db.users.aggregate([{'$match' : query},{'$group': {'_id': '$user'}}, {'$count': "distinctcount"}])
@@ -119,7 +120,7 @@ def findLoyal():
     return findLoyal(device_query_parameter, os_query_parameter)
 
 
-@cache.memoize(timeout=500)
+@cache.memoize()
 def findLoyal(device = "" , os="" ):
     query={}
     if (device == None):
@@ -132,7 +133,7 @@ def findLoyal(device = "" , os="" ):
     if os !="":
         oses = [int(x) for x in os.split(',')]
         query['os'] = {'$in' : oses}
-    # conn = pymongo.MongoClient('mongodb://admin:admin123@localhost:27017/')
+    # conn = pymongo.MongoClient('mongo://admin:admin123@mongo:27017/')
     conn = pymongo.MongoClient('mongo', 27017)
     db = conn['Data']
     loyalusers = db.users.aggregate([{ '$match': query },{'$group' : {'_id' : '$user', 'total' : { '$sum' : 1 }}}, {'$match': {'total':{ '$gte': 10}}}, {'$count': "loyalcount"}],allowDiskUse=True)
