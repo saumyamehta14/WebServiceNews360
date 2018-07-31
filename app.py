@@ -62,7 +62,7 @@ def taskstatus(task_id):
 @celery.task(bind=True)
 def mongoimport(self):
     filepath = "data.csv"
-    conn = pymongo.MongoClient('mongo://admin:admin123@mongo:27017/')
+    conn = pymongo.MongoClient('mongodb://admin:admin123@mongo:27017/')
     # conn = pymongo.MongoClient('mongo', 27017)
     mng_db = conn['Data']
     collection_name = 'users'
@@ -103,7 +103,7 @@ def findUnique(device = "" , os="" ):
     if os !="":
         oses = [int(x) for x in os.split(',')]
         query['os'] = {'$in' : oses}
-    #conn = pymongo.MongoClient('mongo://admin:admin123@mongo:27017/')
+    #conn = pymongo.MongoClient('mongodb://admin:admin123@mongo:27017/')
     conn = pymongo.MongoClient('mongo', 27017)
     db = conn['Data']
     distinctusers = db.users.aggregate([{'$match' : query},{'$group': {'_id': '$user'}}, {'$count': "distinctcount"}])
@@ -133,7 +133,7 @@ def findLoyal(device = "" , os="" ):
     if os !="":
         oses = [int(x) for x in os.split(',')]
         query['os'] = {'$in' : oses}
-    # conn = pymongo.MongoClient('mongo://admin:admin123@mongo:27017/')
+    # conn = pymongo.MongoClient('mongodb://admin:admin123@mongo:27017/')
     conn = pymongo.MongoClient('mongo', 27017)
     db = conn['Data']
     loyalusers = db.users.aggregate([{ '$match': query },{'$group' : {'_id' : '$user', 'total' : { '$sum' : 1 }}}, {'$match': {'total':{ '$gte': 10}}}, {'$count': "loyalcount"}],allowDiskUse=True)
