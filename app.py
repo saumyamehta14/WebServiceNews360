@@ -7,6 +7,11 @@ import json
 from flask import Flask, jsonify, request
 import os
 from flask_caching import Cache
+import redis
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 
 app = Flask(__name__)
 
@@ -14,8 +19,7 @@ cache = Cache(app, config={
     'CACHE_TYPE': 'redis',
     'CACHE_KEY_PREFIX': 'fcache',
     'CACHE_REDIS_HOST': 'redis',
-    'CACHE_REDIS_PORT': '6379',
-
+    'CACHE_REDIS_PORT': '6379'
     })
 # 'CACHE_REDIS_URL': 'redis://localhost:6379'
 
@@ -49,7 +53,7 @@ def findUnique():
 	print("YAY IT WORKED")
 	return findUnique(device_query_parameter, os_query_parameter)
 
-
+@cache.memoize(timeout=500)
 def findUnique(device = "" , os="" ):
 	query={}
 	if (device == None):
@@ -79,7 +83,7 @@ def findLoyal():
 	return findLoyal(device_query_parameter, os_query_parameter)
 
 
-@cache.cached(timeout=500 ,key_prefix = 'fcache')
+@cache.memoize(timeout=500)
 def findLoyal(device = "" , os="" ):
 	query={}
 	if (device == None):
