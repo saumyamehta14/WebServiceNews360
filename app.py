@@ -61,7 +61,6 @@ def taskstatus(task_id):
 
 @celery.task(bind=True)
 def mogoimport(self):
-    print('Async Function Called')
     filepath = "data.csv"
     # conn = pymongo.MongoClient('mongodb://admin:admin123@localhost:27017/')
     conn = pymongo.MongoClient('mongo', 27017)
@@ -73,7 +72,6 @@ def mogoimport(self):
     for chunk in pd.read_csv(filepath, chunksize=chunksize, names=["datetime", "user", "os", "device"]):
         data_json = json.loads(chunk.to_json(orient='records'))
         db_cm.insert(data_json)
-        print('done')
     conn.close()
 
 @app.route('/import-data/')
@@ -89,7 +87,6 @@ def homepage():
 def findUnique():
     device_query_parameter = request.args.get('device')
     os_query_parameter = request.args.get('os')
-    print("YAY IT WORKED")
     return findUnique(device_query_parameter, os_query_parameter)
 
 @cache.memoize(timeout=500)
@@ -113,7 +110,7 @@ def findUnique(device = "" , os="" ):
     for user in distinctusers:
         distinctcount = user['distinctcount']
     conn.close()
-    return jsonify(distinctcount)
+    return {"count" : distinctcount}
 
 @app.route('/loyal-users', methods = ['GET'])
 def findLoyal():
@@ -143,7 +140,7 @@ def findLoyal(device = "" , os="" ):
     for user in loyalusers:
         usercount = user['loyalcount']
     conn.close()
-    return jsonify(usercount)
+    return {"count" : usercount}
 
 if __name__ == '__main__':
     mogoimport()
